@@ -1,4 +1,6 @@
 package wumpusworld;
+import java.util.Vector;
+
 
 /**
  * Contains starting code for creating your own Wumpus World agent.
@@ -11,6 +13,9 @@ public class MyAgent implements Agent
     private World w;
     int rnd;
     
+    //Vector<Vector<SquareNode>> map; 
+    SquareNode[][] map;
+    
     /**
      * Creates a new instance of your solver agent.
      * 
@@ -19,6 +24,15 @@ public class MyAgent implements Agent
     public MyAgent(World world)
     {
         w = world;   
+        //map = new Vector<Vector<SquareNode>>();
+        //map = new Vector<>();
+        System.out.println("HEJ");
+        map = new SquareNode[4][4];
+        
+        for (int row = 0; row < 4; row ++)
+            for (int col = 0; col < 4; col++)
+                map[row][col] = new SquareNode();
+        
     }
    
             
@@ -52,15 +66,15 @@ public class MyAgent implements Agent
         //Test the environment
         if (w.hasBreeze(cX, cY))
         {
-            System.out.println("I am in a Breeze");
+            map[cX-1][cY-1].setThing(1, "b");
         }
         if (w.hasStench(cX, cY))
         {
-            System.out.println("I am in a Stench");
+            map[cX-1][cY-1].setThing(1, "s");
         }
         if (w.hasPit(cX, cY))
         {
-            System.out.println("I am in a Pit");
+            map[cX-1][cY-1].setThing(1, "p");
         }
         if (w.getDirection() == World.DIR_RIGHT)
         {
@@ -78,8 +92,12 @@ public class MyAgent implements Agent
         {
             System.out.println("I am facing Down");
         }
-        
+        System.out.println("breeze " + map[cX-1][cY-1].getThing("b"));
+        System.out.println("stench " + map[cX-1][cY-1].getThing("s"));
+        System.out.println("pit " + map[cX-1][cY-1].getThing("p"));
+        System.out.println("");
         //decide next move
+        /*
         rnd = decideRandomMove();
         if (rnd==0)
         {
@@ -104,11 +122,11 @@ public class MyAgent implements Agent
             w.doAction(World.A_TURN_RIGHT);
             w.doAction(World.A_MOVE);
         }
-                
+        */
     }    
     
      /**
-     * Genertes a random instruction for the Agent.
+     * Generates a random instruction for the Agent.
      */
     public int decideRandomMove()
     {
