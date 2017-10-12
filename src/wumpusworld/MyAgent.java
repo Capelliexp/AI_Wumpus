@@ -139,7 +139,6 @@ public class MyAgent implements Agent
         }
         
         
-        
         // action time
         
         if (w.isValidPosition(cX+1, cY))
@@ -217,6 +216,49 @@ public class MyAgent implements Agent
                     w.doAction(World.A_MOVE);
                 }
             }
+        //right left up down
+        }else if ((cY-y) == 0) //left or right
+        {
+           if ((cX-x) == 1) //left
+            {
+                if(curDir == 4)
+                {
+                    w.doAction(World.A_TURN_RIGHT);
+                    w.doAction(World.A_MOVE);
+                }else if(curDir == 3)
+                {
+                    w.doAction(World.A_TURN_LEFT);
+                    w.doAction(World.A_MOVE);
+                }else if(curDir == 2)
+                {
+                    w.doAction(World.A_MOVE);
+                }else
+                {
+                    w.doAction(World.A_TURN_LEFT);
+                    w.doAction(World.A_TURN_LEFT);
+                    w.doAction(World.A_MOVE);
+                }
+                
+            } else if ((cX-x) == -1) //right
+            {
+                if(curDir == 4)
+                {
+                    w.doAction(World.A_TURN_LEFT);
+                    w.doAction(World.A_MOVE);
+                }else if(curDir == 3)
+                {
+                    w.doAction(World.A_TURN_RIGHT);
+                    w.doAction(World.A_MOVE);
+                }else if(curDir == 2)
+                {
+                    w.doAction(World.A_TURN_LEFT);
+                    w.doAction(World.A_TURN_LEFT);
+                    w.doAction(World.A_MOVE);
+                }else
+                {
+                    w.doAction(World.A_MOVE);
+                }
+            } 
         }
     }
     
