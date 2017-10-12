@@ -46,7 +46,7 @@ public class MyAgent implements Agent
         int cX = w.getPlayerX();
         int cY = w.getPlayerY();
         
-        
+        int direction = -1;
         //Basic action:
         //Grab Gold if we can.
         if (w.hasGlitter(cX, cY))
@@ -79,52 +79,169 @@ public class MyAgent implements Agent
         if (w.getDirection() == World.DIR_RIGHT)
         {
             System.out.println("I am facing Right");
+            direction = 1;
         }
         if (w.getDirection() == World.DIR_LEFT)
         {
             System.out.println("I am facing Left");
+            direction = 2;
         }
         if (w.getDirection() == World.DIR_UP)
         {
             System.out.println("I am facing Up");
+            direction = 3;
         }
         if (w.getDirection() == World.DIR_DOWN)
         {
             System.out.println("I am facing Down");
+            direction = 4;
         }
         System.out.println("breeze " + map[cX-1][cY-1].getThing("b"));
         System.out.println("stench " + map[cX-1][cY-1].getThing("s"));
         System.out.println("pit " + map[cX-1][cY-1].getThing("p"));
         System.out.println("");
+        
+        
         //decide next move
-        /*
-        rnd = decideRandomMove();
-        if (rnd==0)
+        //print("HEJ1");
+        if (!w.hasStench(cX, cY) && !w.hasPit(cX, cY) && !w.hasBreeze(cX, cY))
         {
-            w.doAction(World.A_TURN_LEFT);
-            w.doAction(World.A_MOVE);
+            //print("HEJ2");
+            int tempX = cX+1;
+            int tempY = cY;
+            
+            if (w.isUnknown(tempX, tempY))
+            {
+                setMapThing(tempX, tempY, 2, "pw");
+            }
+            tempX = cX-1;
+            tempY = cY;
+            
+            if (w.isUnknown(tempX, tempY))
+            {
+                setMapThing(tempX, tempY, 2, "pw");
+            }
+            tempX = cX;
+            tempY = cY+1;
+            
+            if (w.isUnknown(tempX, tempY))
+            {
+                setMapThing(tempX, tempY, 2, "pw");
+            }
+            tempX = cX;
+            tempY = cY-1;
+            
+            if (w.isUnknown(tempX, tempY))
+            {
+                setMapThing(tempX, tempY, 2, "pw");
+            }
+            
         }
         
-        if (rnd==1)
+        
+        
+        // action time
+        
+        if (w.isValidPosition(cX+1, cY))
         {
-            w.doAction(World.A_MOVE);
-        }
-                
-        if (rnd==2)
+            int tempx = cX+1;
+            int tempy = cY;
+            if(getMapThing(tempx, tempy, "p") == 2 && getMapThing(tempx, tempy, "w") == 2)
+            {
+                print("HEJ3");
+                moveTo(tempx, tempy, direction);
+            }
+        }else if (w.isValidPosition(cX, cY+1))
         {
-            w.doAction(World.A_TURN_LEFT);
-            w.doAction(World.A_TURN_LEFT);
-            w.doAction(World.A_MOVE);
+            int tempx = cX;
+            int tempy = cY+1;
+            if(getMapThing(tempx, tempy, "p") == 2 && getMapThing(tempx, tempy, "w") == 2)
+            {
+                print("HEJ4");
+                moveTo(tempx, tempy, direction);
+            }           
         }
-                        
-        if (rnd==3)
-        {
-            w.doAction(World.A_TURN_RIGHT);
-            w.doAction(World.A_MOVE);
-        }
-        */
-    }    
+        
+    }   
     
+    public void moveTo(int x, int y, int curDir) //use only for neighbour
+    {
+        int cX = w.getPlayerX();
+        int cY = w.getPlayerY();
+        
+        if(!w.isValidPosition(x,y))
+        {
+            System.out.println("YOU CAN'T DO THAT");
+            return;
+        }
+        //right left up down
+        if((cX-x) == 0) //up or down
+        {
+            if ((cY-y) == 1) //down
+            {
+                if(curDir == 4)
+                {
+                    w.doAction(World.A_MOVE);
+                }else if(curDir == 3)
+                {
+                    w.doAction(World.A_TURN_LEFT);
+                    w.doAction(World.A_TURN_LEFT);
+                    w.doAction(World.A_MOVE);
+                }else if(curDir == 2)
+                {
+                    w.doAction(World.A_TURN_LEFT);
+                    w.doAction(World.A_MOVE);
+                }else
+                {
+                    w.doAction(World.A_TURN_RIGHT);
+                    w.doAction(World.A_MOVE);
+                }
+                
+            } else if ((cY-y) == -1) //up
+            {
+                if(curDir == 4)
+                {
+                    w.doAction(World.A_TURN_LEFT);
+                    w.doAction(World.A_TURN_LEFT);
+                    w.doAction(World.A_MOVE);
+                }else if(curDir == 3)
+                {
+                    w.doAction(World.A_MOVE);
+                }else if(curDir == 2)
+                {
+                    w.doAction(World.A_TURN_RIGHT);
+                    w.doAction(World.A_MOVE);
+                }else
+                {
+                    w.doAction(World.A_TURN_LEFT);
+                    w.doAction(World.A_MOVE);
+                }
+            }
+        }
+    }
+    
+    public void setMapThing(int x, int y, int value, String t)
+    {
+        if (w.isValidPosition(x, y))
+        {
+            map[x-1][y-1].setThing(value, t);
+        }
+    }
+    
+    
+    public int getMapThing(int x , int y, String t)
+    {
+        if (w.isValidPosition(x, y))
+        {
+            return map[x-1][y-1].getThing(t);
+        }
+        return -1;
+    }
+    
+    public void print(String t)
+    {
+        System.out.println(t);
+    }
      /**
      * Generates a random instruction for the Agent.
      */

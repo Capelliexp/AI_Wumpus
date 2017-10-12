@@ -65,6 +65,10 @@ public class SquareNode {
         } else if (t.toLowerCase().equals("g"))
         {
             this.gold = value;
+        } else if (t.toLowerCase().equals("pw"))
+        {
+            this.pit = value;
+            this.wumpus = value;
         }
     }
     
