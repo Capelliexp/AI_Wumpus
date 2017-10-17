@@ -1,6 +1,8 @@
 package wumpusworld;
-import java.util.Vector;
-
+import java.util.*;
+import static wumpusworld.World.A_MOVE;
+import static wumpusworld.World.A_TURN_LEFT;
+import static wumpusworld.World.A_TURN_RIGHT;
 
 /**
  * Contains starting code for creating your own Wumpus World agent.
@@ -12,6 +14,11 @@ public class MyAgent implements Agent
 {
     private World w;
     int rnd;
+    
+    public int DIR_UP = 0;
+    public int DIR_RIGHT = 1;
+    public int DIR_DOWN = 2;
+    public int DIR_LEFT = 3;
     
     //Vector<Vector<SquareNode>> map; 
     SquareNode[][] map;
@@ -32,9 +39,8 @@ public class MyAgent implements Agent
         for (int row = 0; row < 4; row ++)
             for (int col = 0; col < 4; col++)
                 map[row][col] = new SquareNode();
-        
-    }
    
+    }
             
     /**
      * Asks your solver agent to execute an action.
@@ -62,6 +68,36 @@ public class MyAgent implements Agent
             w.doAction(World.A_CLIMB);
             return;
         }
+        
+        //Anton test!
+
+        List<Integer> dirs = new ArrayList<Integer>();
+        dirs.add(DIR_UP);
+        dirs.add(DIR_RIGHT);
+        dirs.add(DIR_DOWN);
+        dirs.add(DIR_LEFT);
+        
+        for(int a=0;a<dirs.size();a++){
+            if(isValid(a) == false){
+                dirs.remove(a);
+            }
+        }
+        for(int a=0;a<dirs.size();a++){
+            if(isGoodMove(dirs.get(a)) == true){
+                //rotate to that direction and do move
+                int current = w.getDirection();
+                rotatePlayer(current, dirs.get(a));
+                w.doAction(A_MOVE);
+                return;
+            }
+        }
+        int prehapsNotPit = -1;
+        for(int a=0;a<dirs.size();a++){
+            prehapsNotPit = a; //least likely to be a pit
+        }
+        
+        
+        //End Anton test!
         
         //Test the environment
         if (w.hasBreeze(cX, cY))
@@ -291,7 +327,90 @@ public class MyAgent implements Agent
     {
       return (int)(Math.random() * 4);
     }
+            
+    public boolean haveWumpus(int x, int y)
+    {
+        if((   ((w.hasStench(x+1, y)?1:0) + (w.hasStench(x, y+1)?1:0) + (w.hasStench(x-1, y)?1:0) + (w.hasStench(x, y-1)?1:0)) >= 2   )){
+            return true;
+        }
+        return false;
+    }
+    /*isGoodMove checks if given coordinates is safe and have unvisited neighbors*/
+    public boolean isGoodMove(int dir)
+    {
+        int x = w.getPlayerX();
+        int y = w.getPlayerY();
+        switch(dir){
+            case 0:
+                return isSafe(x,y+1) && haveUnvisited(x,y+1);
+            case 1:
+                return isSafe(x+1,y) && haveUnvisited(x+1,y);
+            case 2:
+                return isSafe(x,y-1) && haveUnvisited(x,y-1);
+            case 3:
+                return isSafe(x-1,y) && haveUnvisited(x-1,y);
+            default:
+                return false;
+        }
+    }
+    /*isSafe checks if given coordinates is safe to go to*/
+    public boolean isSafe(int x, int y)
+    {
+        for(int c=0;c<4;c++){
+            
+        }
+        return true;
+    }
+    /*haveUnvisited checks if given coordinates have unvisited neighbors*/
+    public boolean haveUnvisited(int x, int y)
+    {
+        if(!w.isVisited(x,y+1) || !w.isVisited(x+1,y) || !w.isVisited(x,y-1) || !w.isVisited(x-1,y)){ //isVisited just say false if unvalid
+            return true;
+        }
+        return false;
+    }
     
     
+    public boolean isValid(int dir)
+    {
+        int x = w.getPlayerX();
+        int y = w.getPlayerY();
+        switch(dir){
+            case 0:
+                return w.isValidPosition(x,y+1);
+            case 1:
+                return w.isValidPosition(x+1,y);
+            case 2:
+                return w.isValidPosition(x,y-1);
+            case 3:
+                return w.isValidPosition(x-1,y);
+            default:
+                return false;
+        }
+    }
+    public void rotatePlayer(int currentDir, int wantedDir)
+    {
+        if(currentDir == wantedDir){
+            return;
+        }
+        
+        if(Math.abs(currentDir-wantedDir) == 2){
+            w.doAction(A_TURN_LEFT);
+            w.doAction(A_TURN_LEFT);
+            return;
+        }
+        
+        if(currentDir-wantedDir < 0 || currentDir == 3){
+            w.doAction(A_TURN_RIGHT);
+            return;
+        }
+        if(currentDir-wantedDir > 0 || wantedDir == 3){
+            w.doAction(A_TURN_LEFT);
+            return;
+        }
+        //(0,2), (2,0), (1,3), (3,1)
+        //(0,1), (1,2), (2,3), (3,0)
+        //(1,0), (2,1), (3,2), (0,3)
+    }
 }
 
