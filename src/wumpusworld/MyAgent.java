@@ -1,6 +1,7 @@
 package wumpusworld;
 import java.util.*;
 import static wumpusworld.World.A_MOVE;
+import static wumpusworld.World.A_SHOOT;
 import static wumpusworld.World.A_TURN_LEFT;
 import static wumpusworld.World.A_TURN_RIGHT;
 
@@ -76,14 +77,17 @@ public class MyAgent implements Agent
         dirs.add(DIR_RIGHT);
         dirs.add(DIR_DOWN);
         dirs.add(DIR_LEFT);
+        //Sort list by current direction??
         
         for(int a=0;a<dirs.size();a++){
-            if(isValid(a) == false){
+            if(validMove(dirs.get(a)) == false){
                 dirs.remove(a);
+                a--;
             }
         }
+        
         for(int a=0;a<dirs.size();a++){
-            if(isGoodMove(dirs.get(a)) == true){
+            if(goodMove(dirs.get(a)) == true){
                 //rotate to that direction and do move
                 int current = w.getDirection();
                 rotatePlayer(current, dirs.get(a));
@@ -91,9 +95,46 @@ public class MyAgent implements Agent
                 return;
             }
         }
-        int prehapsNotPit = -1;
+        
         for(int a=0;a<dirs.size();a++){
-            prehapsNotPit = a; //least likely to be a pit
+            if(killWumpusMove(dirs.get(a)) == true){
+                //then rotate to that direction, shoot and do move
+                int current = w.getDirection();
+                rotatePlayer(current, dirs.get(a));
+                w.doAction(A_SHOOT );
+                w.doAction(A_MOVE);
+                return;
+            }
+        }
+        
+        for(int a=0;a<dirs.size();a++){
+            if(retreatMove(dirs.get(a)) == true){
+                //then rotate to that direction and do move
+                int current = w.getDirection();
+                rotatePlayer(current, dirs.get(a));
+                w.doAction(A_MOVE);
+                return;
+            }
+        }
+        
+        for(int a=0;a<dirs.size();a++){
+            if(perhapsPitMove(dirs.get(a)) == true){
+                //then rotate to that direction and do move
+                int current = w.getDirection();
+                rotatePlayer(current, dirs.get(a));
+                w.doAction(A_MOVE);
+                return;
+            }
+        }
+        
+        for(int a=0;a<dirs.size();a++){
+            if(perhapsWumpusMove(dirs.get(a)) == true){
+                //then rotate to that direction and do move
+                int current = w.getDirection();
+                rotatePlayer(current, dirs.get(a));
+                w.doAction(A_MOVE);
+                return;
+            }
         }
         
         
@@ -327,51 +368,14 @@ public class MyAgent implements Agent
     {
       return (int)(Math.random() * 4);
     }
-            
-    public boolean haveWumpus(int x, int y)
-    {
-        if((   ((w.hasStench(x+1, y)?1:0) + (w.hasStench(x, y+1)?1:0) + (w.hasStench(x-1, y)?1:0) + (w.hasStench(x, y-1)?1:0)) >= 2   )){
-            return true;
-        }
-        return false;
-    }
-    /*isGoodMove checks if given coordinates is safe and have unvisited neighbors*/
-    public boolean isGoodMove(int dir)
-    {
-        int x = w.getPlayerX();
-        int y = w.getPlayerY();
-        switch(dir){
-            case 0:
-                return isSafe(x,y+1) && haveUnvisited(x,y+1);
-            case 1:
-                return isSafe(x+1,y) && haveUnvisited(x+1,y);
-            case 2:
-                return isSafe(x,y-1) && haveUnvisited(x,y-1);
-            case 3:
-                return isSafe(x-1,y) && haveUnvisited(x-1,y);
-            default:
-                return false;
-        }
-    }
-    /*isSafe checks if given coordinates is safe to go to*/
-    public boolean isSafe(int x, int y)
-    {
-        for(int c=0;c<4;c++){
-            
-        }
-        return true;
-    }
-    /*haveUnvisited checks if given coordinates have unvisited neighbors*/
-    public boolean haveUnvisited(int x, int y)
-    {
-        if(!w.isVisited(x,y+1) || !w.isVisited(x+1,y) || !w.isVisited(x,y-1) || !w.isVisited(x-1,y)){ //isVisited just say false if unvalid
-            return true;
-        }
-        return false;
-    }
     
     
-    public boolean isValid(int dir)
+    /**********************************************************************/
+    //  This section holds the Move-functions that decides on a move        
+    /**********************************************************************/
+    
+    //TRUE IF DIRECTION IS VALID
+    public boolean validMove(int dir)
     {
         int x = w.getPlayerX();
         int y = w.getPlayerY();
@@ -388,29 +392,174 @@ public class MyAgent implements Agent
                 return false;
         }
     }
+    //TRUE IF DIRECTION IS SAFE AND IS UNVISITED
+    public boolean goodMove(int dir)
+    {
+        int x = w.getPlayerX();
+        int y = w.getPlayerY();
+        switch(dir){
+            case 0:
+                return isSafe(x,y+1) && isUnvisited(x,y+1);
+            case 1:
+                return isSafe(x+1,y) && isUnvisited(x+1,y);
+            case 2:
+                return isSafe(x,y-1) && isUnvisited(x,y-1);
+            case 3:
+                return isSafe(x-1,y) && isUnvisited(x-1,y);
+            default:
+                return false;
+        }
+    }
+    //TRUE IF DIRECTION CERTAINLY CONTAINS WUMPUS
+    public boolean killWumpusMove(int dir)
+    {
+        int x = w.getPlayerX();
+        int y = w.getPlayerY();
+        switch(dir){
+            case 0:
+                return isWumpus(x,y+1) && noPit(x,y+1);
+            case 1:
+                return isWumpus(x+1,y) && noPit(x+1,y);
+            case 2:
+                return isWumpus(x,y-1) && noPit(x,y-1);
+            case 3:
+                return isWumpus(x-1,y) && noPit(x-1,y);
+            default:
+                return false;
+        }
+    }
+    //TRUE IF DIRECTION IS SAFE AND HAVE UNVISITED NEIGHBORS
+    public boolean retreatMove(int dir)
+    {
+        int x = w.getPlayerX();
+        int y = w.getPlayerY();
+        switch(dir){
+            case 0:
+                return isSafe(x,y+1) && haveUnvisited(x,y+1);
+            case 1:
+                return isSafe(x+1,y) && haveUnvisited(x+1,y);
+            case 2:
+                return isSafe(x,y-1) && haveUnvisited(x,y-1);
+            case 3:
+                return isSafe(x-1,y) && haveUnvisited(x-1,y);
+            default:
+                return false;
+        }
+    }
+    //TRUE IF DIRECTION MIGHT NOT CONTAIN A PIT AND CERTAIN NOT WUMPUS
+    public boolean perhapsPitMove(int dir)
+    {
+        int x = w.getPlayerX();
+        int y = w.getPlayerY();
+        switch(dir){
+            case 0:
+                return !isPit(x,y+1) && noWumpus(x,y+1);
+            case 1:
+                return !isPit(x+1,y) && noWumpus(x+1,y);
+            case 2:
+                return !isPit(x,y-1) && noWumpus(x,y-1);
+            case 3:
+                return !isPit(x-1,y) && noWumpus(x-1,y);
+            default:
+                return false;
+        }
+    }
+    //TRUE IF DIRECTION MIGHT NOT CONTAIN A WUMPUS AND CERTAIN NOT PIT
+    public boolean perhapsWumpusMove(int dir)
+    {
+        int x = w.getPlayerX();
+        int y = w.getPlayerY();
+        switch(dir){
+            case 0:
+                return !noWumpus(x,y+1) && noPit(x,y+1);
+            case 1:
+                return !noWumpus(x+1,y) && noPit(x+1,y);
+            case 2:
+                return !noWumpus(x,y-1) && noPit(x,y-1);
+            case 3:
+                return !noWumpus(x-1,y) && noPit(x-1,y);
+            default:
+                return false;
+        }
+    }
+    
+    /**********************************************************************/
+    //  This section holds the IS/NO-functions for coord information   
+    /**********************************************************************/
+    
+    //TRUE IF COORDINATES ARE SAFE
+    public boolean isSafe(int x, int y)
+    {
+        for(int c=0;c<4;c++){
+            
+        }
+        return true;
+    }
+    //TRUE IF COORDINATES ARE UNVISITED
+    public boolean isUnvisited(int x, int y)
+    {
+        return !w.isVisited(x,y);
+    }
+    /*TRUE IF CERTAIN A WUMPUS*/
+    public boolean isWumpus(int x, int y)
+    {
+        if((   ((w.hasStench(x+1, y)?1:0) + (w.hasStench(x, y+1)?1:0) + (w.hasStench(x-1, y)?1:0) + (w.hasStench(x, y-1)?1:0)) >= 2   )){
+            return true;
+        }
+        return false;
+    }
+    /*TRUE IF CERTAIN NOT A WUMPUS*/
+    public boolean noWumpus(int x, int y)
+    {
+        return false;
+    }
+    /*TRUE IF CERTAIN A PIT*/
+    public boolean isPit(int x, int y)
+    {
+        return false;
+    }
+    /*TRUE IF CERTAIN NOT A PIT*/
+    public boolean noPit(int x, int y)
+    {
+        return false;
+    }
+    /*TRUE IF HAVE UNVISITED NEIGHBORS*/
+    public boolean haveUnvisited(int x, int y)
+    {    
+        return !w.isVisited(x,y+1) || !w.isVisited(x+1,y) || !w.isVisited(x,y-1) || !w.isVisited(x-1,y);
+    }
+    
+    /**********************************************************************/
+    //  This section have other helping functions
+    /**********************************************************************/
+   
     public void rotatePlayer(int currentDir, int wantedDir)
     {
         if(currentDir == wantedDir){
             return;
-        }
-        
+        }//(0,0), (1,1), (2,2), (3,3)
         if(Math.abs(currentDir-wantedDir) == 2){
             w.doAction(A_TURN_LEFT);
             w.doAction(A_TURN_LEFT);
             return;
-        }
-        
+        }//(0,2), (2,0), (1,3), (3,1)
         if(currentDir-wantedDir < 0 || currentDir == 3){
             w.doAction(A_TURN_RIGHT);
             return;
-        }
+        }//(0,1), (1,2), (2,3), (3,0)
         if(currentDir-wantedDir > 0 || wantedDir == 3){
             w.doAction(A_TURN_LEFT);
             return;
-        }
-        //(0,2), (2,0), (1,3), (3,1)
-        //(0,1), (1,2), (2,3), (3,0)
-        //(1,0), (2,1), (3,2), (0,3)
+        }//(1,0), (2,1), (3,2), (0,3) 
     }
+    
+     
+    
+    
+    
+    
+    
+    
+     
 }
 
