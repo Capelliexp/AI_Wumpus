@@ -49,11 +49,9 @@ public class MyAgent implements Agent
                 if(isPit(x,y)){
                     System.out.print("P");
                 }
-                if(isWumpus(x,y)){
-                    System.out.print("W");
-                }
-                if(!isWumpus(x,y) && !isPit(x,y))
+                if(noPit(x,y)){
                     System.out.print("S");
+                }
             }
             System.out.print("\n");
         }
@@ -400,8 +398,6 @@ public class MyAgent implements Agent
             
             isPitCheck(xArr, yArr);
         }
-       
-       
         return false;
     }
     
