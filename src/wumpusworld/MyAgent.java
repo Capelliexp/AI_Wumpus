@@ -139,6 +139,19 @@ public class MyAgent implements Agent
             }
         }
         
+        //IF ...
+        for(int a=0;a<dirs.size();a++){
+            if(killWumpusPitMove(dirs.get(a)) == true){
+                System.out.println("KillWumpusPitMove");
+                //then rotate to that direction and do move
+                int current = w.getDirection();
+                rotatePlayer(current, dirs.get(a));
+                w.doAction(A_SHOOT);
+                w.doAction(A_MOVE);
+                return;
+            }
+        }
+        
         //IF POSSIBLE OTHER WAY, GO THERE (A LITTLE FUZZY)
         for(int a=0;a<dirs.size();a++){
             if(longRetreatMove(dirs.get(a)) == true){
@@ -309,19 +322,41 @@ public class MyAgent implements Agent
                 return false;
         }
     }
-    public boolean searchMove(int dir)
+    public boolean killWumpusPitMove(int dir)
     {
         int x = w.getPlayerX();
         int y = w.getPlayerY();
         switch(dir){
             case 0:
-                return isSafe(x,y+1) && haveUnvisitedDiagonal(x,y+1);
+                return isWumpus(x,y+1);
             case 1:
-                return isSafe(x+1,y) && haveUnvisitedDiagonal(x+1,y);
+                return isWumpus(x+1,y);
             case 2:
-                return isSafe(x,y-1) && haveUnvisitedDiagonal(x,y-1);
+                return isWumpus(x,y-1);
             case 3:
-                return isSafe(x-1,y) && haveUnvisitedDiagonal(x-1,y);
+                return isWumpus(x-1,y);
+            default:
+                return false;
+        }
+    }
+    public boolean searchMove(int dir)
+    {
+        System.out.println("SEARCH: " + dir);
+        int x = w.getPlayerX();
+        int y = w.getPlayerY();
+        switch(dir){
+            case 0:
+                System.out.println("isSafe: " + isSafe(x,y+1) + " isValidPosition: " + w.isValidPosition(x, y+1+1));
+                return (isSafe(x,y+1)) && w.isValidPosition(x, y+1+1);
+            case 1:
+                System.out.println("isSafe: " + isSafe(x+1, y) + " isValidPosition: " + w.isValidPosition(x+1+1, y));
+                return (isSafe(x+1,y)) && w.isValidPosition(x+1+1, y);
+            case 2:
+                System.out.println("isSafe: " + isSafe(x, y-1) + " isValidPosition: " + w.isValidPosition(x, y-1-1));
+                return (isSafe(x,y-1)) && w.isValidPosition(x, y-1-1);
+            case 3:
+                System.out.println("isSafe: " + isSafe(x-1, y) + " isValidPosition: " + w.isValidPosition(x-1-1, y));
+                return (isSafe(x-1,y)) && w.isValidPosition(x-1-1, y);
             default:
                 return false;
         }
