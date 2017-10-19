@@ -340,6 +340,17 @@ public class MyAgent implements Agent
     {
         return (noWumpus(x,y) && noPit(x,y));
     }
+    /*TRUE IF HAVE UNVISITED NEIGHBORS*/
+    public boolean haveUnvisited(int x, int y)
+    {    
+        return (w.isUnknown(x,y+1)) || (w.isUnknown(x+1,y)) || (w.isUnknown(x,y-1)) || (w.isUnknown(x-1,y));
+    }
+    /*TRUE IF HAVE UNVISITED NEIGHBORS*/
+    public boolean haveUnvisitedDiagonal(int x, int y)
+    {    
+        return (w.isUnknown(x+1,y+1)) || (w.isUnknown(x-1,y-1)) || (w.isUnknown(x+1,y-1)) || (w.isUnknown(x-1,y+1));
+    }
+    
     /*TRUE IF CERTAIN A WUMPUS*/
     public boolean isWumpus(int x, int y)
     {
@@ -405,6 +416,39 @@ public class MyAgent implements Agent
         
         return false;
     }
+    /*TRUE IF A NEIGHBOR IS WUMPUS*/
+    public boolean haveWumpus(int x, int y)
+    {    
+        if(w.hasStench(x,y)){
+            if(isWumpus(x+1,y)){
+                return true;
+            }
+            else if(isWumpus(x,y+1)){
+                return true;
+            }
+            else if(isWumpus(x-1,y)){
+                return true;
+            }
+            else if(isWumpus(x,y-1)){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /*TRUE IF CERTAIN NOT A PIT*/
+    public boolean noPit(int x, int y)
+    {
+        if(((!w.hasBreeze(x+1, y) && w.isVisited(x+1, y)) || 
+            (!w.hasBreeze(x, y+1) && w.isVisited(x, y+1)) || 
+            (!w.hasBreeze(x-1, y) && w.isVisited(x-1, y)) || 
+            (!w.hasBreeze(x, y-1) && w.isVisited(x, y-1)) || 
+            (w.isVisited(x, y) && !w.hasPit(x, y))
+            )){
+            return true;
+        }
+        return false;
+    }
     /*TRUE IF CERTAIN A PIT*/
     public boolean isPit(int x, int y){
             
@@ -443,48 +487,6 @@ public class MyAgent implements Agent
             !((w.hasPit(xArr[2], yArr[2]) ^ w.isVisited(xArr[2], yArr[2])) ^ w.isValidPosition(xArr[2], yArr[2]))){            
                 return true;
             }
-        return false;
-    }
-    /*TRUE IF CERTAIN NOT A PIT*/
-    public boolean noPit(int x, int y)
-    {
-        if(((!w.hasBreeze(x+1, y) && w.isVisited(x+1, y)) || 
-            (!w.hasBreeze(x, y+1) && w.isVisited(x, y+1)) || 
-            (!w.hasBreeze(x-1, y) && w.isVisited(x-1, y)) || 
-            (!w.hasBreeze(x, y-1) && w.isVisited(x, y-1)) || 
-            (w.isVisited(x, y) && !w.hasPit(x, y))
-            )){
-            return true;
-        }
-        return false;
-    }
-    /*TRUE IF HAVE UNVISITED NEIGHBORS*/
-    public boolean haveUnvisited(int x, int y)
-    {    
-        return (w.isUnknown(x,y+1)) || (w.isUnknown(x+1,y)) || (w.isUnknown(x,y-1)) || (w.isUnknown(x-1,y));
-    }
-    /*TRUE IF HAVE UNVISITED NEIGHBORS*/
-    public boolean haveUnvisitedDiagonal(int x, int y)
-    {    
-        return (w.isUnknown(x+1,y+1)) || (w.isUnknown(x-1,y-1)) || (w.isUnknown(x+1,y-1)) || (w.isUnknown(x-1,y+1));
-    }
-    /*TRUE IF A NEIGHBOR IS WUMPUS*/
-    public boolean haveWumpus(int x, int y)
-    {    
-        if(w.hasStench(x,y)){
-            if(isWumpus(x+1,y)){
-                return true;
-            }
-            else if(isWumpus(x,y+1)){
-                return true;
-            }
-            else if(isWumpus(x-1,y)){
-                return true;
-            }
-            else if(isWumpus(x,y-1)){
-                return true;
-            }
-        }
         return false;
     }
     
