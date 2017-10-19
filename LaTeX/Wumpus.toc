@@ -1,0 +1,4 @@
+\select@language {swedish}
+\contentsline {section}{Inneh\r all}{1}
+\contentsline {section}{Introduktion}{1}
+\contentsline {section}{Referenser}{2}
