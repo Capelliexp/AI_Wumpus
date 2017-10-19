@@ -372,80 +372,48 @@ public class MyAgent implements Agent
         return false;
     }
     /*TRUE IF CERTAIN A PIT*/
-    /*public boolean isPit(int x, int y)
-    {
-        //if(w.isVisited(x,y) && w.hasPit(x, y)) return false
-        int breezes = (w.hasBreeze(x+1, y)?1:0) + (w.hasBreeze(x, y+1)?1:0) + (w.hasBreeze(x-1, y)?1:0) + (w.hasBreeze(x, y-1)?1:0);
-        if( breezes >= 2 && w.isUnknown(x, y)){
-            return true;
-        }
-        /*if(w.hasPit(x, y) == true) return true;
-        if(!w.isValidPosition(x, y)) return false;
+    public boolean isPit(int x, int y){
+            
+        if(w.hasPit(x, y) == true) return true;
        
         if(w.hasBreeze(x+1, y))
-            if(!w.hasPit(x+1, y+1) && !w.hasPit(x+1, y-1) && !w.hasPit(x+1+1, y)) return true;
+        {
+            if (!((w.hasPit(x+1, y+1) ^ w.isVisited(x+1, y+1)) ^ w.isValidPosition(x+1, y+1)) &&
+                !((w.hasPit(x+1, y-1) ^ w.isVisited(x+1, y-1)) ^ w.isValidPosition(x+1, y-1)) &&
+                !((w.hasPit(x+1+1, y) ^ w.isVisited(x+1+1, y)) ^ w.isValidPosition(x+1+1, y)))
+            {
+                return true;
+            }
+        }      
         if(w.hasBreeze(x-1, y))
-            if(!w.hasPit(x-1, y+1) && !w.hasPit(x-1, y-1) && !w.hasPit(x-1-1, y)) return true;
+        {
+            if (!((w.hasPit(x-1, y+1) ^ w.isVisited(x-1, y+1)) ^ w.isValidPosition(x-1, y+1)) &&
+                    !((w.hasPit(x-1, y-1) ^ w.isVisited(x-1, y-1)) ^ w.isValidPosition(x-1, y-1)) &&
+                    !((w.hasPit(x-1-1, y) ^ w.isVisited(x-1-1, y)) ^ w.isValidPosition(x-1-1, y)))  
+            {
+                return true;
+            }
+        }
         if(w.hasBreeze(x, y+1))
-            if(!w.hasPit(x-1, y+1) && !w.hasPit(x+1, y+1) && !w.hasPit(x, y+1+1)) return true;
+        {
+            if (!((w.hasPit(x-1, y+1) ^ w.isVisited(x-1, y+1)) ^ w.isValidPosition(x-1, y+1)) &&
+                !((w.hasPit(x+1, y+1) ^ w.isVisited(x+1, y+1)) ^ w.isValidPosition(x+1, y+1)) &&
+                !((w.hasPit(x, y+1+1) ^ w.isVisited(x, y+1+1)) ^ w.isValidPosition(x, y+1+1)))
+            {               
+                return true;
+            }
+        }
         if(w.hasBreeze(x, y-1))
-            if(!w.hasPit(x-1, y-1) && !w.hasPit(x+1, y-1) && !w.hasPit(x, y-1-1)) return true;*/
-      //  return false;
-    //}
-        public boolean isPit(int x, int y){
-            
-        if(w.hasPit(x, y)){
-            return true;
-        }
-        if(!w.isValidPosition(x, y)){
-            return false;}
-       
-        if(w.isVisited(x, y) && !w.hasPit(x, y)){
-            return false;
+        {
+            if (!((w.hasPit(x-1, y-1) ^ w.isVisited(x-1, y-1)) ^ w.isValidPosition(x-1, y-1)) &&
+                !((w.hasPit(x+1, y-1) ^ w.isVisited(x+1, y-1)) ^ w.isValidPosition(x+1, y-1)) &&
+                !((w.hasPit(x, y-1-1) ^ w.isVisited(x, y-1-1)) ^ w.isValidPosition(x, y-1-1)))  
+            {            
+                return true;
+            }
         }
        
-        //--------------
        
-        if(w.hasBreeze(x+1, y)){
-            int xArr[] = {x+1, x+1+1, x+1};
-            int yArr[] = {y+1, y, y-1};
-           
-            if((!w.hasPit(xArr[0], yArr[0]) && (w.isVisited(xArr[0], yArr[0]) || !w.isValidPosition(xArr[0], yArr[0]))) &&
-                    (!w.hasPit(xArr[1], yArr[1]) && (w.isVisited(xArr[1], yArr[1]) || !w.isValidPosition(xArr[1], yArr[1]))) &&
-                    (!w.hasPit(xArr[2], yArr[2]) && (w.isVisited(xArr[2], yArr[2]) || !w.isValidPosition(xArr[2], yArr[2])))){
-                return true;
-            }
-        }
-        if(w.hasBreeze(x-1, y)){
-            int xArr[] = {x-1, x-1, x-1-1};
-            int yArr[] = {y+1, y-1, y};
- 
-            if((!w.hasPit(xArr[0], yArr[0]) && (w.isVisited(xArr[0], yArr[0]) || !w.isValidPosition(xArr[0], yArr[0]))) &&
-                    (!w.hasPit(xArr[1], yArr[1]) && (w.isVisited(xArr[1], yArr[1]) || !w.isValidPosition(xArr[1], yArr[1]))) &&
-                    (!w.hasPit(xArr[2], yArr[2]) && (w.isVisited(xArr[2], yArr[2]) || !w.isValidPosition(xArr[2], yArr[2])))){
-                return true;
-            }
-        }
-        if(w.hasBreeze(x, y+1)){
-            int xArr[] = {x-1, x, x+1};
-            int yArr[] = {y+1, y+1+1, y+1};
-           
-            if((!w.hasPit(xArr[0], yArr[0]) && (w.isVisited(xArr[0], yArr[0]) || !w.isValidPosition(xArr[0], yArr[0]))) &&
-                    (!w.hasPit(xArr[1], yArr[1]) && (w.isVisited(xArr[1], yArr[1]) || !w.isValidPosition(xArr[1], yArr[1]))) &&
-                    (!w.hasPit(xArr[2], yArr[2]) && (w.isVisited(xArr[2], yArr[2]) || !w.isValidPosition(xArr[2], yArr[2])))){
-                return true;
-            }
-        }
-        if(w.hasBreeze(x, y-1)){
-            int xArr[] = {x-1, x, x+1};
-            int yArr[] = {y-1, y-1-1, y-1};
-           
-            if((!w.hasPit(xArr[0], yArr[0]) && (w.isVisited(xArr[0], yArr[0]) || !w.isValidPosition(xArr[0], yArr[0]))) &&
-                    (!w.hasPit(xArr[1], yArr[1]) && (w.isVisited(xArr[1], yArr[1]) || !w.isValidPosition(xArr[1], yArr[1]))) &&
-                    (!w.hasPit(xArr[2], yArr[2]) && (w.isVisited(xArr[2], yArr[2]) || !w.isValidPosition(xArr[2], yArr[2])))){
-                return true;
-            }
-        }
         return false;
     }
 
