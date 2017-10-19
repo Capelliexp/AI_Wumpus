@@ -49,11 +49,9 @@ public class MyAgent implements Agent
                 if(isPit(x,y)){
                     System.out.print("P");
                 }
-                if(isWumpus(x,y)){
-                    System.out.print("W");
-                }
-                if(!isWumpus(x,y) && !isPit(x,y))
+                if(noPit(x,y)){
                     System.out.print("S");
+                }
             }
             System.out.print("\n");
         }
@@ -388,8 +386,8 @@ public class MyAgent implements Agent
         if(w.hasBreeze(x-1, y))
         {
             if (!((w.hasPit(x-1, y+1) ^ w.isVisited(x-1, y+1)) ^ w.isValidPosition(x-1, y+1)) &&
-                    !((w.hasPit(x-1, y-1) ^ w.isVisited(x-1, y-1)) ^ w.isValidPosition(x-1, y-1)) &&
-                    !((w.hasPit(x-1-1, y) ^ w.isVisited(x-1-1, y)) ^ w.isValidPosition(x-1-1, y)))  
+                !((w.hasPit(x-1, y-1) ^ w.isVisited(x-1, y-1)) ^ w.isValidPosition(x-1, y-1)) &&
+                !((w.hasPit(x-1-1, y) ^ w.isVisited(x-1-1, y)) ^ w.isValidPosition(x-1-1, y)))  
             {
                 return true;
             }
@@ -412,8 +410,6 @@ public class MyAgent implements Agent
                 return true;
             }
         }
-       
-       
         return false;
     }
 
