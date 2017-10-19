@@ -106,7 +106,7 @@ public class MyAgent implements Agent
                 //then rotate to that direction, shoot and do move
                 int current = w.getDirection();
                 rotatePlayer(current, dirs.get(a));
-                w.doAction(A_SHOOT );
+                w.doAction(A_SHOOT);
                 w.doAction(A_MOVE);
                 return;
             }
@@ -343,7 +343,6 @@ public class MyAgent implements Agent
     /*TRUE IF CERTAIN A WUMPUS*/
     public boolean isWumpus(int x, int y)
     {
-        if(noWumpus(x, y) || !w.isValidPosition(x, y)) return false;
         int stenches = (w.hasStench(x+1, y)?1:0) + (w.hasStench(x, y+1)?1:0) + (w.hasStench(x-1, y)?1:0) + (w.hasStench(x, y-1)?1:0);
         if( (stenches >= 2) && w.isUnknown(x, y)){
             return true;
@@ -354,19 +353,56 @@ public class MyAgent implements Agent
     /*TRUE IF CERTAIN NOT A WUMPUS*/
     public boolean noWumpus(int x, int y)
     {
-        if(((!w.hasStench(x+1, y) && w.isVisited(x+1, y))|| 
-            (!w.hasStench(x, y+1) && w.isVisited(x, y+1))|| 
-            (!w.hasStench(x-1, y) && w.isVisited(x-1, y))|| 
-            (!w.hasStench(x, y-1) && w.isVisited(x, y-1))||
+        System.out.println("noWumpus() start");
+        //iterate over every coordinate and see if we find stench in any coord other than the neighbors of (x, y)
+        for(int yCoord=1; yCoord <= 4; yCoord++){
+            for(int xCoord=1; xCoord <= 4; xCoord++){
+                if(w.hasStench(xCoord, yCoord)){
+                    if(xCoord == x){
+                        if(yCoord == y+1 || yCoord == y-1){
+                            System.out.println("noWumpus() found stench in neighbor");
+                        }
+                        else{
+                            System.out.println("noWumpus() returning false");
+                            return true;
+                        }
+                    }
+                    else if(xCoord == x-1){
+                        if(yCoord == y){
+                            System.out.println("noWumpus() found stench in neighbor");
+                        }
+                        else{
+                            System.out.println("noWumpus() returning false");
+                            return true;
+                        }
+                    }
+                    else if(xCoord == x+1){
+                        if(yCoord == y){
+                            System.out.println("noWumpus() found stench in neighbor");
+                        }
+                        else{
+                            System.out.println("noWumpus() returning false");
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if(((!w.hasStench(x+1, y) && w.isVisited(x+1, y)) || 
+            (!w.hasStench(x, y+1) && w.isVisited(x, y+1)) || 
+            (!w.hasStench(x-1, y) && w.isVisited(x-1, y)) || 
+            (!w.hasStench(x, y-1) && w.isVisited(x, y-1)) ||
             (w.isVisited(x, y))
             )){
+            System.out.println("noWumpus() if true");
             return true;
         }
-        /*else if((w.hasStench(x+1, y) || w.hasStench(x, y+1) || w.hasStench(x-1, y) || w.hasStench(x, y-1)) &&
-                (isWumpus(x+1, y+1) || isWumpus(x+1, y-1) || isWumpus(x-1, y+1) || isWumpus(x-1, y-1))){
-            System.out.println("HERE IM, ONES AGAIN");
+        else if(isWumpus(x+1, y+1) || isWumpus(x+1, y-1) || isWumpus(x-1, y+1) || isWumpus(x-1, y-1) || isWumpus(x+2, y) || isWumpus(x, y+2) || isWumpus(x-2, y) || isWumpus(x, y-2)){
+            System.out.println("noWumpus() lowest else true");
             return true;
-        }*/
+        }
+        
         return false;
     }
     /*TRUE IF CERTAIN A PIT*/
@@ -413,10 +449,10 @@ public class MyAgent implements Agent
     /*TRUE IF CERTAIN NOT A PIT*/
     public boolean noPit(int x, int y)
     {
-        if(((!w.hasBreeze(x+1, y) && w.isVisited(x+1, y))|| 
-            (!w.hasBreeze(x, y+1) && w.isVisited(x, y+1))|| 
-            (!w.hasBreeze(x-1, y) && w.isVisited(x-1, y))|| 
-            (!w.hasBreeze(x, y-1) && w.isVisited(x, y-1))||
+        if(((!w.hasBreeze(x+1, y) && w.isVisited(x+1, y)) || 
+            (!w.hasBreeze(x, y+1) && w.isVisited(x, y+1)) || 
+            (!w.hasBreeze(x-1, y) && w.isVisited(x-1, y)) || 
+            (!w.hasBreeze(x, y-1) && w.isVisited(x, y-1)) ||
             (w.isVisited(x, y) && !w.hasPit(x, y))
             )){
             return true;
