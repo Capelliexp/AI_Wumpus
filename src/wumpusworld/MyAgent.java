@@ -41,6 +41,22 @@ public class MyAgent implements Agent
         int cX = w.getPlayerX();
         int cY = w.getPlayerY();
         
+        /*
+        PRINT MAP OF KNOWN PITS!
+        */
+        for(int y=4;y>=1;y--){
+            for(int x=1;x<=4;x++){
+                if(isPit(x,y)){
+                    System.out.print("P");
+                }
+                if(isWumpus(x,y)){
+                    System.out.print("W");
+                }
+                if(!isWumpus(x,y) && !isPit(x,y))
+                    System.out.print("S");
+            }
+            System.out.print("\n");
+        }
         //Basic action:
         //Grab Gold if we can.
         if (w.hasGlitter(cX, cY))
@@ -122,6 +138,18 @@ public class MyAgent implements Agent
             }
         }
         
+        //IF POSSIBLE OTHER WAY, GO THERE (A LITTLE FUZZY)
+        for(int a=0;a<dirs.size();a++){
+            if(longRetreatMove(dirs.get(a)) == true){
+                System.out.println("LongRetreatMove");
+                //then rotate to that direction and do move
+                int current = w.getDirection();
+                rotatePlayer(current, dirs.get(a));
+                w.doAction(A_MOVE);
+                return;
+            }
+        }
+        
         //IF NOT CERTAIN WUMPUS AND NO PIT, GO THERE
         for(int a=0;a<dirs.size();a++){
             if(perhapsWumpusMove(dirs.get(a)) == true){
@@ -133,6 +161,7 @@ public class MyAgent implements Agent
                 return;
             }
         }
+        
         //IF NOT CERTAIN WUMPUS, GO THERE
         for(int a=0;a<dirs.size();a++){
             if(perhapsWumpusPitMove(dirs.get(a)) == true){
@@ -140,6 +169,7 @@ public class MyAgent implements Agent
                 //then rotate to that direction and do move
                 int current = w.getDirection();
                 rotatePlayer(current, dirs.get(a));
+                w.doAction(A_SHOOT);
                 w.doAction(A_MOVE);
                 return;
             }
@@ -248,6 +278,24 @@ public class MyAgent implements Agent
                 return false;
         }
     }
+    //TRUE IF DIRECTION IS SAFE AND HAVE UNVISITED NEIGHBORS IN DIAGONAL
+    public boolean longRetreatMove(int dir)
+    {
+        int x = w.getPlayerX();
+        int y = w.getPlayerY();
+        switch(dir){
+            case 0:
+                return isSafe(x,y+1) && haveUnvisitedDiagonal(x,y+1);
+            case 1:
+                return isSafe(x+1,y) && haveUnvisitedDiagonal(x+1,y);
+            case 2:
+                return isSafe(x,y-1) && haveUnvisitedDiagonal(x,y-1);
+            case 3:
+                return isSafe(x-1,y) && haveUnvisitedDiagonal(x-1,y);
+            default:
+                return false;
+        }
+    }
     //TRUE IF DIRECTION MIGHT NOT CONTAIN A WUMPUS AND CERTAIN NOT PIT
     public boolean perhapsWumpusMove(int dir)
     {
@@ -297,13 +345,12 @@ public class MyAgent implements Agent
     /*TRUE IF CERTAIN A WUMPUS*/
     public boolean isWumpus(int x, int y)
     {
+        if(noWumpus(x, y) || !w.isValidPosition(x, y)) return false;
         int stenches = (w.hasStench(x+1, y)?1:0) + (w.hasStench(x, y+1)?1:0) + (w.hasStench(x-1, y)?1:0) + (w.hasStench(x, y-1)?1:0);
         if( (stenches >= 2) && w.isUnknown(x, y)){
             return true;
         }
-        /*else if(stenches==1 && (        )){
-            return true;
-        }*/
+
         return false;
     }
     /*TRUE IF CERTAIN NOT A WUMPUS*/
@@ -325,22 +372,91 @@ public class MyAgent implements Agent
         return false;
     }
     /*TRUE IF CERTAIN A PIT*/
-    public boolean isPit(int x, int y)
+    /*public boolean isPit(int x, int y)
     {
+        //if(w.isVisited(x,y) && w.hasPit(x, y)) return false
         int breezes = (w.hasBreeze(x+1, y)?1:0) + (w.hasBreeze(x, y+1)?1:0) + (w.hasBreeze(x-1, y)?1:0) + (w.hasBreeze(x, y-1)?1:0);
         if( breezes >= 2 && w.isUnknown(x, y)){
             return true;
         }
+        /*if(w.hasPit(x, y) == true) return true;
+        if(!w.isValidPosition(x, y)) return false;
+       
+        if(w.hasBreeze(x+1, y))
+            if(!w.hasPit(x+1, y+1) && !w.hasPit(x+1, y-1) && !w.hasPit(x+1+1, y)) return true;
+        if(w.hasBreeze(x-1, y))
+            if(!w.hasPit(x-1, y+1) && !w.hasPit(x-1, y-1) && !w.hasPit(x-1-1, y)) return true;
+        if(w.hasBreeze(x, y+1))
+            if(!w.hasPit(x-1, y+1) && !w.hasPit(x+1, y+1) && !w.hasPit(x, y+1+1)) return true;
+        if(w.hasBreeze(x, y-1))
+            if(!w.hasPit(x-1, y-1) && !w.hasPit(x+1, y-1) && !w.hasPit(x, y-1-1)) return true;*/
+      //  return false;
+    //}
+        public boolean isPit(int x, int y){
+            
+        if(w.hasPit(x, y)){
+            return true;
+        }
+        if(!w.isValidPosition(x, y)){
+            return false;}
+       
+        if(w.isVisited(x, y) && !w.hasPit(x, y)){
+            return false;
+        }
+       
+        //--------------
+       
+        if(w.hasBreeze(x+1, y)){
+            int xArr[] = {x+1, x+1+1, x+1};
+            int yArr[] = {y+1, y, y-1};
+           
+            if((!w.hasPit(xArr[0], yArr[0]) && (w.isVisited(xArr[0], yArr[0]) || !w.isValidPosition(xArr[0], yArr[0]))) &&
+                    (!w.hasPit(xArr[1], yArr[1]) && (w.isVisited(xArr[1], yArr[1]) || !w.isValidPosition(xArr[1], yArr[1]))) &&
+                    (!w.hasPit(xArr[2], yArr[2]) && (w.isVisited(xArr[2], yArr[2]) || !w.isValidPosition(xArr[2], yArr[2])))){
+                return true;
+            }
+        }
+        if(w.hasBreeze(x-1, y)){
+            int xArr[] = {x-1, x-1, x-1-1};
+            int yArr[] = {y+1, y-1, y};
+ 
+            if((!w.hasPit(xArr[0], yArr[0]) && (w.isVisited(xArr[0], yArr[0]) || !w.isValidPosition(xArr[0], yArr[0]))) &&
+                    (!w.hasPit(xArr[1], yArr[1]) && (w.isVisited(xArr[1], yArr[1]) || !w.isValidPosition(xArr[1], yArr[1]))) &&
+                    (!w.hasPit(xArr[2], yArr[2]) && (w.isVisited(xArr[2], yArr[2]) || !w.isValidPosition(xArr[2], yArr[2])))){
+                return true;
+            }
+        }
+        if(w.hasBreeze(x, y+1)){
+            int xArr[] = {x-1, x, x+1};
+            int yArr[] = {y+1, y+1+1, y+1};
+           
+            if((!w.hasPit(xArr[0], yArr[0]) && (w.isVisited(xArr[0], yArr[0]) || !w.isValidPosition(xArr[0], yArr[0]))) &&
+                    (!w.hasPit(xArr[1], yArr[1]) && (w.isVisited(xArr[1], yArr[1]) || !w.isValidPosition(xArr[1], yArr[1]))) &&
+                    (!w.hasPit(xArr[2], yArr[2]) && (w.isVisited(xArr[2], yArr[2]) || !w.isValidPosition(xArr[2], yArr[2])))){
+                return true;
+            }
+        }
+        if(w.hasBreeze(x, y-1)){
+            int xArr[] = {x-1, x, x+1};
+            int yArr[] = {y-1, y-1-1, y-1};
+           
+            if((!w.hasPit(xArr[0], yArr[0]) && (w.isVisited(xArr[0], yArr[0]) || !w.isValidPosition(xArr[0], yArr[0]))) &&
+                    (!w.hasPit(xArr[1], yArr[1]) && (w.isVisited(xArr[1], yArr[1]) || !w.isValidPosition(xArr[1], yArr[1]))) &&
+                    (!w.hasPit(xArr[2], yArr[2]) && (w.isVisited(xArr[2], yArr[2]) || !w.isValidPosition(xArr[2], yArr[2])))){
+                return true;
+            }
+        }
         return false;
     }
+
     /*TRUE IF CERTAIN NOT A PIT*/
     public boolean noPit(int x, int y)
     {
         if(((!w.hasBreeze(x+1, y) && w.isVisited(x+1, y))|| 
             (!w.hasBreeze(x, y+1) && w.isVisited(x, y+1))|| 
             (!w.hasBreeze(x-1, y) && w.isVisited(x-1, y))|| 
-            (!w.hasBreeze(x, y-1) && w.isVisited(x, y-1))//||
-            //(w.isVisited(x, y))
+            (!w.hasBreeze(x, y-1) && w.isVisited(x, y-1))||
+            (w.isVisited(x, y) && !w.hasPit(x, y))
             )){
             return true;
         }
@@ -350,6 +466,11 @@ public class MyAgent implements Agent
     public boolean haveUnvisited(int x, int y)
     {    
         return (w.isUnknown(x,y+1)) || (w.isUnknown(x+1,y)) || (w.isUnknown(x,y-1)) || (w.isUnknown(x-1,y));
+    }
+    /*TRUE IF HAVE UNVISITED NEIGHBORS*/
+    public boolean haveUnvisitedDiagonal(int x, int y)
+    {    
+        return (w.isUnknown(x+1,y+1)) || (w.isUnknown(x-1,y-1)) || (w.isUnknown(x+1,y-1)) || (w.isUnknown(x-1,y+1));
     }
     /*TRUE IF A NEIGHBOR IS WUMPUS*/
     public boolean haveWumpus(int x, int y)
@@ -364,8 +485,9 @@ public class MyAgent implements Agent
             else if(isWumpus(x-1,y)){
                 return true;
             }
-            else if(isWumpus(x,y-1))
+            else if(isWumpus(x,y-1)){
                 return true;
+            }
         }
         return false;
     }
@@ -386,11 +508,11 @@ public class MyAgent implements Agent
             w.doAction(A_TURN_LEFT);
             return;
         }//(0,2), (2,0), (1,3), (3,1)
-        if(currentDir-wantedDir < 0 || currentDir == 3){
+        if(currentDir-wantedDir < 0 || (currentDir == 3 && wantedDir == 0)){
             w.doAction(A_TURN_RIGHT);
             return;
         }//(0,1), (1,2), (2,3), (3,0)
-        if(currentDir-wantedDir > 0 || wantedDir == 3){
+        if(currentDir-wantedDir > 0 || (currentDir == 0 && wantedDir == 0)){
             w.doAction(A_TURN_LEFT);
             return;
         }//(1,0), (2,1), (3,2), (0,3) 
