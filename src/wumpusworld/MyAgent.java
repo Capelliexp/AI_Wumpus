@@ -52,6 +52,9 @@ public class MyAgent implements Agent
                 if(noPit(x,y)){
                     System.out.print("S");
                 }
+                if(!isPit(x,y) && !noPit(x,y)){
+                    System.out.print("O");
+                }
             }
             System.out.print("\n");
         }
@@ -72,7 +75,7 @@ public class MyAgent implements Agent
         }
         
         //List of all directitions for current move
-        List<Integer> dirs = new ArrayList<Integer>();
+        List<Integer> dirs = new ArrayList<>();
         dirs.add(DIR_UP);
         dirs.add(DIR_RIGHT);
         dirs.add(DIR_DOWN);
@@ -148,10 +151,22 @@ public class MyAgent implements Agent
             }
         }
         
+        //IF BULLSHIT
+        for(int a=0;a<dirs.size();a++){
+            if(searchMove(dirs.get(a)) == true){
+                System.out.println("SearchMove");
+                //then rotate to that direction and do move
+                int current = w.getDirection();
+                rotatePlayer(current, dirs.get(a));
+                w.doAction(A_MOVE);
+                return;
+            }
+        }
+        
         //IF NOT CERTAIN WUMPUS AND NO PIT, GO THERE
         for(int a=0;a<dirs.size();a++){
             if(perhapsWumpusMove(dirs.get(a)) == true){
-                System.out.println("perhapsWumpusMove");
+                System.out.println("PerhapsWumpusMove");
                 //then rotate to that direction and do move
                 int current = w.getDirection();
                 rotatePlayer(current, dirs.get(a));
@@ -163,7 +178,7 @@ public class MyAgent implements Agent
         //IF NOT CERTAIN WUMPUS, GO THERE
         for(int a=0;a<dirs.size();a++){
             if(perhapsWumpusPitMove(dirs.get(a)) == true){
-                System.out.println("perhapsWumpusPitMove");
+                System.out.println("PerhapsWumpusPitMove");
                 //then rotate to that direction and do move
                 int current = w.getDirection();
                 rotatePlayer(current, dirs.get(a));
@@ -241,19 +256,19 @@ public class MyAgent implements Agent
             case 0:
                 //System.out.println("    isSafe:" + isSafe(x,y+1));
                 //System.out.println("    haveUnvisited:" + haveUnvisited(x,y+1));
-                return isSafe(x,y+1) && haveUnvisited(x,y+1);
+                return isSafe(x,y+1) && haveExplorableNeighbors(x,y+1);
             case 1:
                 //System.out.println("    isSafe:" + isSafe(x+1,y));
                 //System.out.println("    haveUnvisited:" + haveUnvisited(x+1,y));
-                return isSafe(x+1,y) && haveUnvisited(x+1,y);
+                return isSafe(x+1,y) && haveExplorableNeighbors(x+1,y);
             case 2:
                 //System.out.println("    isSafe:" + isSafe(x,y-1));
                 //System.out.println("    haveUnvisited:" + haveUnvisited(x,y-1));
-                return isSafe(x,y-1) && haveUnvisited(x,y-1);
+                return isSafe(x,y-1) && haveExplorableNeighbors(x,y-1);
             case 3:
                 //System.out.println("    isSafe:" + isSafe(x-1,y));
                 //System.out.println("    haveUnvisited:" + haveUnvisited(x-1,y));
-                return isSafe(x-1,y) && haveUnvisited(x-1,y);
+                return isSafe(x-1,y) && haveExplorableNeighbors(x-1,y);
             default:
                 return false;
         }
@@ -265,19 +280,36 @@ public class MyAgent implements Agent
         int y = w.getPlayerY();
         switch(dir){
             case 0:
-                return !isPit(x,y+1) && noWumpus(x,y+1);
+                return !isPit(x,y+1) && noWumpus(x,y+1) && w.isUnknown(x, y+1);
             case 1:
-                return !isPit(x+1,y) && noWumpus(x+1,y);
+                return !isPit(x+1,y) && noWumpus(x+1,y) && w.isUnknown(x+1, y);
             case 2:
-                return !isPit(x,y-1) && noWumpus(x,y-1);
+                return !isPit(x,y-1) && noWumpus(x,y-1) && w.isUnknown(x, y-1);
             case 3:
-                return !isPit(x-1,y) && noWumpus(x-1,y);
+                return !isPit(x-1,y) && noWumpus(x-1,y) && w.isUnknown(x-1, y);
             default:
                 return false;
         }
     }
     //TRUE IF DIRECTION IS SAFE AND HAVE UNVISITED NEIGHBORS IN DIAGONAL
     public boolean longRetreatMove(int dir)
+    {
+        int x = w.getPlayerX();
+        int y = w.getPlayerY();
+        switch(dir){
+            case 0:
+                return isSafe(x,y+1) && haveUnvisitedDiagonal(x,y+1);
+            case 1:
+                return isSafe(x+1,y) && haveUnvisitedDiagonal(x+1,y);
+            case 2:
+                return isSafe(x,y-1) && haveUnvisitedDiagonal(x,y-1);
+            case 3:
+                return isSafe(x-1,y) && haveUnvisitedDiagonal(x-1,y);
+            default:
+                return false;
+        }
+    }
+    public boolean searchMove(int dir)
     {
         int x = w.getPlayerX();
         int y = w.getPlayerY();
@@ -350,49 +382,52 @@ public class MyAgent implements Agent
     {    
         return (w.isUnknown(x+1,y+1)) || (w.isUnknown(x-1,y-1)) || (w.isUnknown(x+1,y-1)) || (w.isUnknown(x-1,y+1));
     }
-    
-    /*TRUE IF CERTAIN A WUMPUS*/
-    public boolean isWumpus(int x, int y)
-    {
-        int stenches = (w.hasStench(x+1, y)?1:0) + (w.hasStench(x, y+1)?1:0) + (w.hasStench(x-1, y)?1:0) + (w.hasStench(x, y-1)?1:0);
-        if( (stenches >= 2) && w.isUnknown(x, y)){
-            return true;
-        }
-
-        return false;
+    /*TRUE IF HAVE EXPLORABLE NEIGHBORS*/
+    public boolean haveExplorableNeighbors(int x, int y)
+    {    
+        /*return ((w.isUnknown(x+1, y) && !isPit(x+1, y) && !isWumpus(x+1, y)) ||
+                (w.isUnknown(x, y+1) && !isPit(x, y+1) && !isWumpus(x, y+1)) ||
+                (w.isUnknown(x-1, y) && !isPit(x-1, y) && !isWumpus(x-1, y)) ||
+                (w.isUnknown(x, y-1) && !isPit(x, y-1) && !isWumpus(x, y-1)) );*/
+        
+        return ((w.isUnknown(x+1, y) && noPit(x+1, y)) ||
+                (w.isUnknown(x, y+1) && noPit(x, y+1)) ||
+                (w.isUnknown(x-1, y) && noPit(x-1, y)) ||
+                (w.isUnknown(x, y-1) && noPit(x, y-1)) );
     }
+    
     /*TRUE IF CERTAIN NOT A WUMPUS*/
     public boolean noWumpus(int x, int y)
     {
-        System.out.println("noWumpus() start");
+        //System.out.println("noWumpus() start");
         //iterate over every coordinate and see if we find stench in any coord other than the neighbors of (x, y)
         for(int yCoord=1; yCoord <= 4; yCoord++){
             for(int xCoord=1; xCoord <= 4; xCoord++){
                 if(w.hasStench(xCoord, yCoord)){
                     if(xCoord == x){
                         if(yCoord == y+1 || yCoord == y-1){
-                            System.out.println("noWumpus() found stench in neighbor");
+                            //System.out.println("noWumpus() found stench in neighbor");
                         }
                         else{
-                            System.out.println("noWumpus() returning false");
+                            //System.out.println("noWumpus() returning false");
                             return true;
                         }
                     }
                     else if(xCoord == x-1){
                         if(yCoord == y){
-                            System.out.println("noWumpus() found stench in neighbor");
+                            //System.out.println("noWumpus() found stench in neighbor");
                         }
                         else{
-                            System.out.println("noWumpus() returning false");
+                            //System.out.println("noWumpus() returning false");
                             return true;
                         }
                     }
                     else if(xCoord == x+1){
                         if(yCoord == y){
-                            System.out.println("noWumpus() found stench in neighbor");
+                            //System.out.println("noWumpus() found stench in neighbor");
                         }
                         else{
-                            System.out.println("noWumpus() returning false");
+                            //System.out.println("noWumpus() returning false");
                             return true;
                         }
                     }
@@ -406,7 +441,7 @@ public class MyAgent implements Agent
             (!w.hasStench(x, y-1) && w.isVisited(x, y-1)) ||
             (w.isVisited(x, y))
             )){
-            System.out.println("noWumpus() if true");
+            //System.out.println("noWumpus() if true");
             return true;
         }
         else if(isWumpus(x+1, y+1) || isWumpus(x+1, y-1) || isWumpus(x-1, y+1) || isWumpus(x-1, y-1) || isWumpus(x+2, y) || isWumpus(x, y+2) || isWumpus(x-2, y) || isWumpus(x, y-2)){
@@ -414,6 +449,16 @@ public class MyAgent implements Agent
             return true;
         }
         
+        return false;
+    }
+    /*TRUE IF CERTAIN A WUMPUS*/
+    public boolean isWumpus(int x, int y)
+    {
+        int stenches = (w.hasStench(x+1, y)?1:0) + (w.hasStench(x, y+1)?1:0) + (w.hasStench(x-1, y)?1:0) + (w.hasStench(x, y-1)?1:0);
+        if( (stenches >= 2) && w.isUnknown(x, y)){
+            return true;
+        }
+
         return false;
     }
     /*TRUE IF A NEIGHBOR IS WUMPUS*/
@@ -497,7 +542,6 @@ public class MyAgent implements Agent
    //GIVEN CURRENT AND WANTED DIRECTION, ROTATE TO WANTED
     public void rotatePlayer(int currentDir, int wantedDir)
     {
-        System.out.println(currentDir + "::" + wantedDir);
         if(currentDir == wantedDir){
             return;
         }//(0,0), (1,1), (2,2), (3,3)
