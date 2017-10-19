@@ -436,7 +436,7 @@ public class MyAgent implements Agent
         }
         return false;
     }
-    
+    /*TRUE IF NEIGHBORS HAVE PIT*/
     boolean isPitCheck(int xArr[], int yArr[]){
         if (!((w.hasPit(xArr[0], yArr[0]) ^ w.isVisited(xArr[0], yArr[0])) ^ w.isValidPosition(xArr[0], yArr[0])) &&
             !((w.hasPit(xArr[1], yArr[1]) ^ w.isVisited(xArr[1], yArr[1])) ^ w.isValidPosition(xArr[1], yArr[1])) &&
@@ -445,14 +445,13 @@ public class MyAgent implements Agent
             }
         return false;
     }
-
     /*TRUE IF CERTAIN NOT A PIT*/
     public boolean noPit(int x, int y)
     {
         if(((!w.hasBreeze(x+1, y) && w.isVisited(x+1, y)) || 
             (!w.hasBreeze(x, y+1) && w.isVisited(x, y+1)) || 
             (!w.hasBreeze(x-1, y) && w.isVisited(x-1, y)) || 
-            (!w.hasBreeze(x, y-1) && w.isVisited(x, y-1)) ||
+            (!w.hasBreeze(x, y-1) && w.isVisited(x, y-1)) || 
             (w.isVisited(x, y) && !w.hasPit(x, y))
             )){
             return true;
