@@ -32,7 +32,23 @@
 \date{\today}
 \maketitle
 
-\section{Implementation}
+\section{Approach}
+The assignment were a part of the BTH course Applied Artificial Intelligence with the goal to test our ability to make a basic AI. Testing of the AI will be done on a version of the computer game \textit{Hunt the Wumpus} with 7 predefined maps. A criteria of the test is that the AI does not make any obvious unintelligent choices, such as walk straight into the wumpus or a known pit without reason.
+
+\subsection{Step 1: Learning}
+In order to create the AI we began by learning about the test environment \textit{Hunt the Wumpus} and all the rules of the game. The purpose of this was so we could get a clearer picture of the problem we needed to solve. This process consisted mainly of just playing the supplied game and test different cases, in addition to just reading up on the actual rules.
+
+\subsection{Step 2: Brainstorming}
+The second part of creating the AI consisted of us choosing to implement it as a rule based system. We did not initially know what kind of rules we could possibly need and what information gathering these rules would require in order to work as required. Since we needed to gather more knowledge of the rules and information necessary we tried to play the game and at the same time discuss it on an almost childish level in order to understand why we choose the moves we did. This gave us an idea of how the AI should behave and how it could prioritize what move to make in a certain situation. 
+
+\subsection{Step 3: Implementation} %wall of text
+For the information gathering we decided on creating 4 main observation functions that return true or false as answer to a question. Either we knew for certain that the wumpus was in a square or we knew for certain that it wasn't. The same idea goes for pits. The \textit{maybe} scenarios are then solved by doing a \textit{not}-certain check that then gives us an answer. To complement this we also made functions to look up some of the neighbors and other kinds of supplementing functions.
+For the actual implementation we used that information in combination with a function that rotate to wanted direction and a priority system of for loops over the valid choices until a decicion on a move is made.The general concept is that the choices with higher priority is placed earlier in the move execution. An example of this is the very first check we do; to see if we have a safe and unvisited neighbor, which is a preferred choice. Safe, in this context, means that the AI is certain that the square contains no wumpus and no pit.
+
+\section{Conclusion}
+Our final thoughts about the project is that it went relatively smooth after the initial learning process of how \textit{Hunt the Wumpus} works. The brainstorming part was also a crucial step where we as a group tried to find possible approaches and find faults in each others ideas and improve on them. The logic part were very interesting and problematic at times but generated some good discussions. There are also parts where we could have optimized the AI to have more numerious and advanced choices in order to handle some situations even better, but as a whole we are satisfied by the result of our work.
+
+
 
 
 
